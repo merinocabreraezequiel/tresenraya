@@ -4,27 +4,28 @@ import os #PARA BORRAR LA CONSOLA
 import sys #PARA IDENTIFICAR LA PLATAFOR
 import tkinter as tk #PARA CREAR LA VENTANA DE TKINTER
 from tkinter import ttk #PARA CREAR LOS BOTONES DE TKINTER
+from tkinter import font #PARA CREAR LA FUENTE DE LOS BOTONES
 
 #VARIABLE DE DEBUG CONDICIONAL
 debug_enabled = True
 
 #CREAMOS LA DICCIONARIO CON LAS POSICIONES Y LES ASIGNAMOS EL VALOR DE VACIO
 tablero = {
-        'A1': '0', 'A2': '0', 'A3': '0',
-        'B1': '0', 'B2': '0', 'B3': '0',
-        'C1': '0', 'C2': '0', 'C3': '0'
+        'A1': ' ', 'A2': ' ', 'A3': ' ',
+        'B1': ' ', 'B2': ' ', 'B3': ' ',
+        'C1': ' ', 'C2': ' ', 'C3': ' '
     }
-def iniciar_tablero(): #DAMOS VALORES 0, LIBRES, A TODAS LAS POSICIONES DEL TABLERO
+def iniciar_tablero(): #DAMOS VALORES ' ', LIBRES, A TODAS LAS POSICIONES DEL TABLERO
     for vertical in ['A', 'B', 'C']:
         for horizontal in ['1', '2', '3']:
-            tablero[vertical+horizontal] = '0'
+            tablero[vertical+horizontal] = ' '
 
 def crear_tablero():
     tablero_frame_estilo = ttk.Style() #CREAMOS EL ESTILO DEL FRAME, ttk NO PERMITE HACERLO CON BG O FG
     tablero_frame_estilo.theme_use("clam") #USAMOS EL TEMA CLAM
-    tablero_frame_estilo.configure("tablero_frame.TFrame", background="black", borderwidth=5, relief="raised") #LO DEFINIMOS Y PONEMOS NOMBRE DE REFERENCIA (HA DE ACABAR CON .TFrame)
-    tablero_frame = ttk.Frame(ventana_juego, padding=10, relief="raised", borderwidth=5, style="tablero_frame.TFrame") #CREAMOS EL FRAME CON EL ESTILO CREADO ANTERIORMENTE
-    tablero_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=5, pady=5) #LO PONEMOS EN LA VENTANA
+    tablero_frame_estilo.configure("tablero_frame.TFrame", background="black", borderwidth=2, relief="raised") #LO DEFINIMOS Y PONEMOS NOMBRE DE REFERENCIA (HA DE ACABAR CON .TFrame)
+    tablero_frame = ttk.Frame(ventana_juego, padding=10, relief="raised", borderwidth=2, style="tablero_frame.TFrame") #CREAMOS EL FRAME CON EL ESTILO CREADO ANTERIORMENTE
+    tablero_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=2, pady=2) #LO PONEMOS EN LA VENTANA
     #SETEAMOS LA ZONA DE JUEGO 3X3
     tablero_frame.rowconfigure(0, weight=1) 
     tablero_frame.rowconfigure(1, weight=1) 
@@ -33,20 +34,23 @@ def crear_tablero():
     tablero_frame.columnconfigure(1, weight=1)
     tablero_frame.columnconfigure(2, weight=1)
     #CREAMOS LOS BOTONES DEL TABLERO Y LOS PONEMOS EN EL FRAME
+    fuente_boton = ttk.Style()
+    fuente_boton_style = font.Font(family="console", size=12, weight="bold")
+    fuente_boton.configure("fuente_boton.TButton",background="darkgray", font=fuente_boton_style) #DEFINIMOS LA FUENTE DE LOS BOTONES
     for vertical in ['A', 'B', 'C']:
         for horizontal in ['1', '2', '3']:
-            boton = ttk.Button(tablero_frame, text=tablero[vertical+horizontal], width=5, command=lambda v=vertical, h=horizontal: jugar(v+h))
-            if vertical == 'A':vert = 0
-            elif vertical == 'B':vert = 1
-            elif vertical == 'C':vert = 2
-            if horizontal == '1':hori = 0
-            elif horizontal == '2':hori = 1
-            elif horizontal == '3':hori = 2
+            boton = ttk.Button(tablero_frame, text='', command=lambda v=vertical, h=horizontal: jugar(v+h), state='disabled', style="fuente_boton.TButton") #CREAMOS EL BOTON CON EL VALOR DEL TABLERO Y LO DESHABILITAMOS
+            vert, hori = conversor_posiciones_grid(vertical, horizontal)
             boton.grid(row=vert, column=hori, sticky=tk.NSEW , padx=2, pady=2) #CREAMOS EL BOTON Y LO PONEMOS EN SU POSICIÓN
             tablero[vertical+horizontal] = boton
 
+#CONVERTIMOS LA LETRA EN UN NUMERO Y NUMEROS EMPEZANDO POR 0 PARA QUE FUNCIONE EN EL GRID
+def conversor_posiciones_grid(vert, hori):
+    if debug_enabled: print('--> conversor_posiciones_grid')
+    return(int(ord(vert))-65, int(hori)-1) 
+
 #DEFINIMOS LOS SIGNOS DE LOS JUGADORES EN UNA VARIABLE TOGGLEABLE
-signos_jugadores = ['X', '+']
+signos_jugadores = ['X', 'O']
 
 #DEFINIMOS LAS OPCIONES DE IA O JUGADOR
 orden_jugadores = []
@@ -85,6 +89,14 @@ def imprimir_tablero(tablero):
     print('B', tablero['B1'], tablero['B2'], tablero['B3'])
     print('C', tablero['C1'], tablero['C2'], tablero['C3'])
 
+#ACTIVAR TODOS LOS BOTONES
+def activar_botones():
+    if debug_enabled: print('--> activando botones')
+    for elemento in ventana_juego.winfo_children():
+        if elemento.grid_info()['row'] == 2 and elemento.grid_info()['column'] == 0:
+            for botones_del_frame in elemento.winfo_children():
+                botones_del_frame["state"]='enabled'
+
 #CREAMOS LA VENTANA TKINTER
 def crear_ventana():
     ventana = tk.Tk()
@@ -108,10 +120,11 @@ def actualizar_mensaje(texto):
     if debug_enabled: print('--> actualizando mensaje a: '+texto)
     label = ttk.Label(ventana_juego, text=texto, font=("console", 15), background="black", foreground="white", justify="center")
     label.grid(row=1, column=0)
+
 #CREAMOS LA INTELIGENCIA ARTIFICIAL
 def ia():
     #AL CENTRO SI SE PUEDE
-    if tablero['B2'] == '0':
+    if tablero['B2'] == ' ':
         return 'B2'
     #COMPROBAMOS SI NOS PUEDEN GANAR O SI PODEMOS GANAR NOSOTROS
     posible_retorno_linia = jugadas_con_opción_de_linia()
@@ -132,30 +145,30 @@ def ia():
 def jugadas_con_opción_de_linia():
     if debug_enabled: print('--> checkeando jugada de linia')
     for leter in ['A', 'B', 'C']:
-        if (tablero[leter+'1'] == tablero[leter+'2'] != '0' and tablero[leter+'3'] == '0'):
+        if (tablero[leter+'1'] == tablero[leter+'2'] != ' ' and tablero[leter+'3'] == ' '):
             return leter+'3'
-        elif (tablero[leter+'1'] == tablero[leter+'3'] != '0' and tablero[leter+'2'] == '0'):
+        elif (tablero[leter+'1'] == tablero[leter+'3'] != ' ' and tablero[leter+'2'] == ' '):
             return leter+'2'
-        elif (tablero[leter+'2'] == tablero[leter+'3'] != '0' and tablero[leter+'1'] == '0'):
+        elif (tablero[leter+'2'] == tablero[leter+'3'] != ' ' and tablero[leter+'1'] == ' '):
             return leter+'1'
     for number in ['1', '2', '3']:
-        if (tablero['A'+number] == tablero['B'+number] != '0' and tablero['C'+number] == '0'):
+        if (tablero['A'+number] == tablero['B'+number] != ' ' and tablero['C'+number] == ' '):
             return 'C'+number
-        elif (tablero['A'+number] == tablero['C'+number] != '0' and tablero['B'+number] == '0'):
+        elif (tablero['A'+number] == tablero['C'+number] != ' ' and tablero['B'+number] == ' '):
             return 'B'+number
-        elif (tablero['B'+number] == tablero['C'+number] != '0' and tablero['A'+number] == '0'):
+        elif (tablero['B'+number] == tablero['C'+number] != ' ' and tablero['A'+number] == ' '):
             return 'A'+number
-    if (tablero['A1'] == tablero['B2'] != '0' and tablero['C3'] == '0'):
+    if (tablero['A1'] == tablero['B2'] != ' ' and tablero['C3'] == ' '):
         return 'C3'
-    elif (tablero['A1'] == tablero['C3'] != '0' and tablero['B2'] == '0'):
+    elif (tablero['A1'] == tablero['C3'] != ' ' and tablero['B2'] == ' '):
         return 'B2'
-    elif (tablero['B2'] == tablero['C3'] != '0' and tablero['A1'] == '0'):
+    elif (tablero['B2'] == tablero['C3'] != ' ' and tablero['A1'] == ' '):
         return 'A1'
-    elif (tablero['A3'] == tablero['B2'] != '0' and tablero['C1'] == '0'):
+    elif (tablero['A3'] == tablero['B2'] != ' ' and tablero['C1'] == ' '):
         return 'C1'
-    elif (tablero['A3'] == tablero['C1'] != '0' and tablero['B2'] == '0'):
+    elif (tablero['A3'] == tablero['C1'] != ' ' and tablero['B2'] == ' '):
         return 'B2'
-    elif (tablero['B2'] == tablero['C1'] != '0' and tablero['A3'] == '0'):
+    elif (tablero['B2'] == tablero['C1'] != ' ' and tablero['A3'] == ' '):
         return 'A3'
     #SI NO HAY JUGADAS CON OPCION DE LINEA SEGUIMOS AL SIGUIENTE PASO
     return None
@@ -163,21 +176,21 @@ def jugadas_con_opción_de_linia():
 #EVALUA JUGADAS EN ESQUINAS
 def jugadas_de_esquinas():
     if debug_enabled: print('--> checkeando jugada de esquinas')
-    if (tablero['A1'] != '0' and tablero['A3'] == '0'):
+    if (tablero['A1'] != ' ' and tablero['A3'] == ' '):
         return 'A3'
-    elif (tablero['A1'] != '0' and tablero['C1'] == '0'):
+    elif (tablero['A1'] != ' ' and tablero['C1'] == ' '):
         return 'C1'
-    elif (tablero['A3'] != '0' and tablero['C3'] == '0'):
+    elif (tablero['A3'] != ' ' and tablero['C3'] == ' '):
         return 'C3'
-    elif (tablero['A3'] != '0' and tablero['A1'] == '0'):
+    elif (tablero['A3'] != ' ' and tablero['A1'] == ' '):
         return 'A1'
-    elif (tablero['C1'] != '0' and tablero['C3'] == '0'):
+    elif (tablero['C1'] != ' ' and tablero['C3'] == ' '):
         return 'C3'
-    elif (tablero['C1'] != '0' and tablero['A1'] == '0'):
+    elif (tablero['C1'] != ' ' and tablero['A1'] == ' '):
         return 'A1'
-    elif (tablero['C3'] != '0' and tablero['A3'] == '0'):
+    elif (tablero['C3'] != ' ' and tablero['A3'] == ' '):
         return 'A3'
-    elif (tablero['C3'] != '0' and tablero['C1'] == '0'):
+    elif (tablero['C3'] != ' ' and tablero['C1'] == ' '):
         return 'C1'
     #SI NO HAY JUGADAS EN ESQUINAS SEGUIMOS AL SIGUIENTE PASO
     return None
@@ -188,7 +201,7 @@ def esquina_disponible():
     jugada = random.choice(['A1', 'A3', 'C1', 'C3'])
     if debug_enabled: print('--> jugada: '+jugada+' tablero: '+tablero[jugada])
     jugadas_probadas = []
-    while tablero[jugada] != '0' and len(jugadas_probadas) < 3:
+    while tablero[jugada] != ' ' and len(jugadas_probadas) < 3:
         jugadas_probadas.append(jugada)
         if debug_enabled: print('--> jugadas_probadas: '+str(jugadas_probadas))
         jugada = random.choice(['A1', 'A3', 'C1', 'C3'])
@@ -198,7 +211,7 @@ def esquina_disponible():
             if debug_enabled: print('--> jugada in jugadas_probadas: jugada: '+jugada+' tablero: '+tablero[jugada])
             if debug_enabled: print('--> jugadas_probadas: '+str(len(jugadas_probadas))+'-'+str(jugadas_probadas))
     #VERIFICAMOS QUE HAY JUGANA Y SI NO PASAMOS AL SIGUINTE PASO
-    if tablero[jugada] == '0':
+    if tablero[jugada] == ' ':
         return jugada
     else:
         return None
@@ -208,13 +221,13 @@ def cruz_disponible():
     if debug_enabled: print('--> checkeando cruces')
     jugada = random.choice(['A2', 'B1', 'B3', 'C2'])
     jugadas_probadas = []
-    while tablero[jugada] != '0' and len(jugadas_probadas) < 3:
+    while tablero[jugada] != ' ' and len(jugadas_probadas) < 3:
         jugadas_probadas.append(jugada)
         jugada = random.choice(['A2', 'B1', 'B3', 'C2'])
         while jugada in jugadas_probadas:
             jugada = random.choice(['A2', 'B1', 'B3', 'C2'])
      #VERIFICAMOS QUE HAY JUGANA Y SI NO PASAMOS AL SIGUINTE PASO
-    if tablero[jugada] == '0':
+    if tablero[jugada] == ' ':
         return jugada
     else:
         return None
@@ -223,7 +236,7 @@ def cruz_disponible():
 def evaluar_tablas():
     if debug_enabled: print('--> checkeando tablas')
     for espacio in tablero:
-        if tablero[espacio] == '0':
+        if tablero[espacio] == ' ':
             return False
     return True
 
@@ -244,7 +257,7 @@ def orden_ia_jugador():
 ventana_juego = crear_ventana()
 
 #DEFINIMOS COMO GLOBAL LOS JUGADORES
-jugadores = '0'
+jugadores = ' '
 #PREGUNTAMOS NUMERO DE JUGADORES
 evaluador_preguntador_jugadores = tk.StringVar()
 def comprobar_jugadores(*args):
@@ -253,18 +266,19 @@ def comprobar_jugadores(*args):
         if debug_enabled: print('--> jugadores: '+jugadores)
         if jugadores == '0':
             if debug_enabled: print('Modo PROFESOR FALKEN INICIANDO...')
-            actualizar_mensaje('Modo PROFESOR FALKEN\nINICIANDO...')
+            actualizar_mensaje('Modo PROFESOR FALKEN')
             orden_jugadores.append('IA')
             orden_jugadores.append('IA')
         elif jugadores == '1':
             if debug_enabled: print('Modo SOLO INICIANDO...')
-            actualizar_mensaje('Modo SOLO\nINICIANDO...')
+            actualizar_mensaje('Modo SOLO')
             orden_ia_jugador()
         else:
             if debug_enabled: print('Modo VS INICIANDO...')
-            actualizar_mensaje('Modo VS\nINICIANDO...')
+            actualizar_mensaje('Modo VS')
             orden_jugadores.append('P')
             orden_jugadores.append('P')
+        activar_botones() #ACTIVAMOS LOS BOTONES DEL TABLERO
     else:
         if debug_enabled: print('Error: Solo puedes elegir 0, 1 o 2 jugadores')
         evaluador_preguntador_jugadores.set('') #LIMPIA EL TEXTO DEL ENTRY
@@ -280,64 +294,46 @@ preguntar_jugadores()
 #PINTAMOS EL TABLERO EN LA VENTANA
 crear_tablero()
 
-#PULSAMOS CUALQUIER TECLAR PARA EMPEZAR
-input('Pulsa cualquier tecla para empezar')
-
 #INICIAMOS EL JUEGO
 iniciar_tablero()
 game_on = True
 
-#INICIAMOS EL JUEGO
-while game_on or evaluar_tablas():
-    #SI VENIMOS DE TABLAS, LIMPIAMOS EL TRABLERO
+#EJECUTAMOS LA JUGADA
+def jugar(jugada_boton):
+    global contador_jugadas, game_on, jugadores, orden_jugadores, tablero, contador_partidas
+    if debug_enabled: print('--> jugada_boton: '+jugada_boton)
+    
     if evaluar_tablas():
         iniciar_tablero()
-    
+
     #IMPRIMIMOS EL TABLERO
     imprimir_tablero(tablero)
 
     #PEDIMOS JUGADA
     jugada_correcta = False
     if orden_jugadores[contador_jugadas % 2] == 'P':
-        jugada = input('Introduce la jugada '+signos_jugadores[contador_jugadas % 2]+' (A1, B2, C3): ').upper()
-
-        #VALIDAMOS JUGADA
-        while jugada_correcta == False:
-            if len(jugada) != 2 or jugada[0] not in 'ABC' or jugada[1] not in '123':
-                print('Jugada imposible')
-                jugada = input('Introduce la jugada '+signos_jugadores[contador_jugadas % 2]+' (A1, B2, C3): ').upper()
-            elif tablero[jugada] != '0':
-                print('Jugada imposible')
-                jugada = input('Introduce la jugada '+signos_jugadores[contador_jugadas % 2]+' (A1, B2, C3): ').upper()
-            else:
-                jugada_correcta = True
+        jugada = jugada_boton
     else:
         jugada = ia()
         print('La IA ha jugado: '+jugada)
-    
-    #LIMPIAMOS
-    limpiar_consola()
-
     #ASIGNAMOS JUGADA AL TABLERO
     tablero[jugada] = signos_jugadores[contador_jugadas % 2]
-
     #INCREMENTAMOS JUGADA
     contador_jugadas += 1
-
     #VALIDAMOS SI HAY GANADOR
-    if (tablero['A1'] == tablero['A2'] == tablero['A3'] != '0' or
-        tablero['B1'] == tablero['B2'] == tablero['B3'] != '0' or
-        tablero['C1'] == tablero['C2'] == tablero['C3'] != '0' or
-        tablero['A1'] == tablero['B1'] == tablero['C1'] != '0' or
-        tablero['A2'] == tablero['B2'] == tablero['C2'] != '0' or
-        tablero['A3'] == tablero['B3'] == tablero['C3'] != '0' or
-        tablero['A1'] == tablero['B2'] == tablero['C3'] != '0' or
-        tablero['A3'] == tablero['B2'] == tablero['C1'] != '0'):
+    if (tablero['A1'] == tablero['A2'] == tablero['A3'] != ' ' or
+        tablero['B1'] == tablero['B2'] == tablero['B3'] != ' ' or
+        tablero['C1'] == tablero['C2'] == tablero['C3'] != ' ' or
+        tablero['A1'] == tablero['B1'] == tablero['C1'] != ' ' or
+        tablero['A2'] == tablero['B2'] == tablero['C2'] != ' ' or
+        tablero['A3'] == tablero['B3'] == tablero['C3'] != ' ' or
+        tablero['A1'] == tablero['B2'] == tablero['C3'] != ' ' or
+        tablero['A3'] == tablero['B2'] == tablero['C1'] != ' '):
         print('El jugador '+signos_jugadores[contador_jugadas % 2]+' ha ganado')
         game_on = False
     elif (evaluar_tablas()):
         print('Tablas')
-        if jugadores != '0':
+        if jugadores != ' ':
             repetir = input('¿Quieres jugar de nuevo? (s/n): ').lower()
             while repetir not in ['s', 'n']:
                 repetir = input('¿Quieres jugar de nuevo? (s/n): ').lower()
@@ -351,3 +347,6 @@ while game_on or evaluar_tablas():
         else:
             contador_jugadas = 0
             contador_partidas += 1
+
+#MANTENEMOS LA VENTANA ABIERTA
+ventana_juego.mainloop()
