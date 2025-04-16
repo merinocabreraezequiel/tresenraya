@@ -5,6 +5,7 @@ import sys #PARA IDENTIFICAR LA PLATAFOR
 import tkinter as tk #PARA CREAR LA VENTANA DE TKINTER
 from tkinter import ttk #PARA CREAR LOS BOTONES DE TKINTER
 from tkinter import font #PARA CREAR LA FUENTE DE LOS BOTONES
+import time #PARA HACER PAUSAS
 
 #VARIABLE DE DEBUG CONDICIONAL
 debug_enabled = True
@@ -39,7 +40,7 @@ def crear_tablero():
     fuente_boton.configure("fuente_boton.TButton",background="darkgray", font=fuente_boton_style) #DEFINIMOS LA FUENTE DE LOS BOTONES
     for vertical in ['A', 'B', 'C']:
         for horizontal in ['1', '2', '3']:
-            boton = ttk.Button(tablero_frame, text='', command=lambda v=vertical, h=horizontal: jugar(v+h), state='disabled', style="fuente_boton.TButton") #CREAMOS EL BOTON CON EL VALOR DEL TABLERO Y LO DESHABILITAMOS
+            boton = ttk.Button(tablero_frame, text='', command=lambda v=vertical, h=horizontal: jugar(v+h), state='disabled', style="fuente_boton.TButton", name=vertical.lower()+horizontal) #CREAMOS EL BOTON CON EL VALOR DEL TABLERO Y LO DESHABILITAMOS
             vert, hori = conversor_posiciones_grid(vertical, horizontal)
             boton.grid(row=vert, column=hori, sticky=tk.NSEW , padx=2, pady=2) #CREAMOS EL BOTON Y LO PONEMOS EN SU POSICIÓN
             tablero[vertical+horizontal] = boton
@@ -278,6 +279,8 @@ def comprobar_jugadores(*args):
             actualizar_mensaje('Modo VS')
             orden_jugadores.append('P')
             orden_jugadores.append('P')
+            time.sleep(3)
+            actualizar_mensaje("TURNO DE X")
         activar_botones() #ACTIVAMOS LOS BOTONES DEL TABLERO
     else:
         if debug_enabled: print('Error: Solo puedes elegir 0, 1 o 2 jugadores')

@@ -176,6 +176,22 @@ def orden_ia_jugador():
         orden_jugadores.append('IA')
         print('El jugador empieza')
 
+
+def consultar_repetir():
+    global game_on, contador_jugadas, contador_partidas, jugadores
+    if debug_enabled: print('--> consultando repetir')
+    repetir = input('¿Quieres jugar de nuevo? (s/n): ').lower()
+    while repetir not in ['s', 'n']:
+        repetir = input('¿Quieres jugar de nuevo? (s/n): ').lower()
+    if repetir == 'n':
+        game_on = False
+    else:
+        iniciar_tablero()
+        if jugadores == '1':
+            orden_ia_jugador()
+        contador_jugadas = 0
+        contador_partidas += 1
+
 #PREGUNTAMOS NUMERO DE JUGADORES
 jugadores = input('¿Cuantos jugadores? (0, 1 o 2): ')
 while jugadores not in ['0', '1', '2']:
@@ -236,9 +252,6 @@ while game_on or evaluar_tablas():
     #ASIGNAMOS JUGADA AL TABLERO
     tablero[jugada] = signos_jugadores[contador_jugadas % 2]
 
-    #INCREMENTAMOS JUGADA
-    contador_jugadas += 1
-
     #VALIDAMOS SI HAY GANADOR
     if (tablero['A1'] == tablero['A2'] == tablero['A3'] != '0' or
         tablero['B1'] == tablero['B2'] == tablero['B3'] != '0' or
@@ -249,20 +262,13 @@ while game_on or evaluar_tablas():
         tablero['A1'] == tablero['B2'] == tablero['C3'] != '0' or
         tablero['A3'] == tablero['B2'] == tablero['C1'] != '0'):
         print('El jugador '+signos_jugadores[contador_jugadas % 2]+' ha ganado')
-        game_on = False
+        consultar_repetir()
     elif (evaluar_tablas()):
         print('Tablas')
         if jugadores != '0':
-            repetir = input('¿Quieres jugar de nuevo? (s/n): ').lower()
-            while repetir not in ['s', 'n']:
-                repetir = input('¿Quieres jugar de nuevo? (s/n): ').lower()
-            if repetir == 'n':
-                game_on = False
-            else:
-                if jugadores == '1':
-                    orden_ia_jugador()
-                contador_jugadas = 0
-                contador_partidas += 1
+            consultar_repetir()
         else:
             contador_jugadas = 0
             contador_partidas += 1
+    #INCREMENTAMOS JUGADA
+    contador_jugadas += 1
