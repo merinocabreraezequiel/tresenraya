@@ -38,6 +38,7 @@ def limpiar_consola():
 
 #IMPRIMIR PLANTILLA ORIGINAL
 def imprimir_tablero(tablero):
+    print(f'Partida {contador_partidas}\n')
     print('  1 2 3')
     print('A', tablero['A1'], tablero['A2'], tablero['A3'])
     print('B', tablero['B1'], tablero['B2'], tablero['B3'])
