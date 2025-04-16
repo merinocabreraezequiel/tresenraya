@@ -14,10 +14,36 @@ tablero = {
         'B1': '0', 'B2': '0', 'B3': '0',
         'C1': '0', 'C2': '0', 'C3': '0'
     }
-def iniciar_tablero():
+def iniciar_tablero(): #DAMOS VALORES 0, LIBRES, A TODAS LAS POSICIONES DEL TABLERO
     for vertical in ['A', 'B', 'C']:
         for horizontal in ['1', '2', '3']:
             tablero[vertical+horizontal] = '0'
+
+def crear_tablero():
+    tablero_frame_estilo = ttk.Style() #CREAMOS EL ESTILO DEL FRAME, ttk NO PERMITE HACERLO CON BG O FG
+    tablero_frame_estilo.theme_use("clam") #USAMOS EL TEMA CLAM
+    tablero_frame_estilo.configure("tablero_frame.TFrame", background="black", borderwidth=5, relief="raised") #LO DEFINIMOS Y PONEMOS NOMBRE DE REFERENCIA (HA DE ACABAR CON .TFrame)
+    tablero_frame = ttk.Frame(ventana_juego, padding=10, relief="raised", borderwidth=5, style="tablero_frame.TFrame") #CREAMOS EL FRAME CON EL ESTILO CREADO ANTERIORMENTE
+    tablero_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=5, pady=5) #LO PONEMOS EN LA VENTANA
+    #SETEAMOS LA ZONA DE JUEGO 3X3
+    tablero_frame.rowconfigure(0, weight=1) 
+    tablero_frame.rowconfigure(1, weight=1) 
+    tablero_frame.rowconfigure(2, weight=1)
+    tablero_frame.columnconfigure(0, weight=1)
+    tablero_frame.columnconfigure(1, weight=1)
+    tablero_frame.columnconfigure(2, weight=1)
+    #CREAMOS LOS BOTONES DEL TABLERO Y LOS PONEMOS EN EL FRAME
+    for vertical in ['A', 'B', 'C']:
+        for horizontal in ['1', '2', '3']:
+            boton = ttk.Button(tablero_frame, text=tablero[vertical+horizontal], width=5, command=lambda v=vertical, h=horizontal: jugar(v+h))
+            if vertical == 'A':vert = 0
+            elif vertical == 'B':vert = 1
+            elif vertical == 'C':vert = 2
+            if horizontal == '1':hori = 0
+            elif horizontal == '2':hori = 1
+            elif horizontal == '3':hori = 2
+            boton.grid(row=vert, column=hori, sticky=tk.NSEW , padx=2, pady=2) #CREAMOS EL BOTON Y LO PONEMOS EN SU POSICIÓN
+            tablero[vertical+horizontal] = boton
 
 #DEFINIMOS LOS SIGNOS DE LOS JUGADORES EN UNA VARIABLE TOGGLEABLE
 signos_jugadores = ['X', '+']
@@ -45,6 +71,12 @@ def limpiar_parrilla(row, column):
         if elemento.grid_info()['row'] == row and elemento.grid_info()['column'] == column:
             elemento.destroy()
 
+#CIERRA LA VENTANA Y ACABA CON LA EJECUCIÓN
+def salir_del_juego():
+    if debug_enabled: print('--> cerrando ventana')
+    ventana_juego.destroy()
+    exit()
+
 #IMPRIMIR PLANTILLA ORIGINAL
 def imprimir_tablero(tablero):
     print(f'Partida {contador_partidas}\n')
@@ -66,7 +98,8 @@ def crear_ventana():
     ventana.rowconfigure(2, weight=5)
     ventana.columnconfigure(0, weight=1)
     titulo = ttk.Label(ventana, text="Tres en raya", font=("console", 20), background="black", foreground="white")
-    titulo.grid(row=0, column=0, sticky="n")
+    titulo.grid(row=0, column=0, sticky=tk.N)
+    ventana.protocol("WM_DELETE_WINDOW", salir_del_juego) #AL PULSAR LA X DE LA VENTANA SE CERRARA EL JUEGO
     return ventana
 
 #ACTUALIZADOR DE LABEL EN LA VENTANA
@@ -239,10 +272,13 @@ def preguntar_jugadores():
     evaluador_preguntador_jugadores.trace_add("write", comprobar_jugadores) #ASIGNAMOS LA FUNCION A LA VARIABLE DE ENTRADA
     preguntador_jugadores_entry = ttk.Entry(ventana_juego, width=5, font=("console", 15), justify="center",textvariable=evaluador_preguntador_jugadores) #CREAMOS EL ENTRY PARA PREGUNTAR JUGADORES Y RELACIONA ASOCIA LA FUNCIÓN
     preguntador_jugadores_texto = ttk.Label(ventana_juego, text="¿Cuantos jugadores? (0, 1 o 2): ", font=("console", 15), background="black", foreground="white")
-    preguntador_jugadores_texto.grid(row=1, column=0, sticky="n")
-    preguntador_jugadores_entry.grid(row=1, column=0, sticky="s")
+    preguntador_jugadores_texto.grid(row=1, column=0, sticky=tk.N)
+    preguntador_jugadores_entry.grid(row=1, column=0, sticky=tk.S)
     preguntador_jugadores_entry.focus() #PONE EL FOCO EN EL ENTRY
 preguntar_jugadores()
+
+#PINTAMOS EL TABLERO EN LA VENTANA
+crear_tablero()
 
 #PULSAMOS CUALQUIER TECLAR PARA EMPEZAR
 input('Pulsa cualquier tecla para empezar')
