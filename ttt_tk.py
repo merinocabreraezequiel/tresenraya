@@ -126,21 +126,22 @@ def actualizar_mensaje(texto):
 def ia():
     #AL CENTRO SI SE PUEDE
     if tablero['B2'] == ' ':
-        return 'B2'
+        jugada_ia = 'B2'
     #COMPROBAMOS SI NOS PUEDEN GANAR O SI PODEMOS GANAR NOSOTROS
     posible_retorno_linia = jugadas_con_opción_de_linia()
     if ( posible_retorno_linia != None):
-        return posible_retorno_linia
+        jugada_ia = posible_retorno_linia
     #VEMOS POR DONDE ESTÁ JUGANDO EL RIVAL
     posible_retorno_esquinas = jugadas_de_esquinas()
     if ( posible_retorno_esquinas != None):
-        return posible_retorno_esquinas
+        jugada_ia = posible_retorno_esquinas
     #ELEGIMOS AL HAZAR UNA ESQUINA PARA EMPEZAR
     posible_retorno_esquina_libre = esquina_disponible()
     if ( posible_retorno_esquina_libre != None):
-        return posible_retorno_esquina_libre
+        jugada_ia = posible_retorno_esquina_libre
     #ELEGIMOS UNA CRUZ DISPONIBLE COMO ULTIMA OPCION
-    return cruz_disponible()
+    jugada_ia = cruz_disponible()
+    jugar(jugada_ia)
 
 #EVALUA TODAS LAS JUGADAS QUE PUEDAN HACER LINIA
 def jugadas_con_opción_de_linia():
