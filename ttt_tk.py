@@ -25,7 +25,7 @@ def crear_tablero():
     tablero_frame_estilo = ttk.Style() #CREAMOS EL ESTILO DEL FRAME, ttk NO PERMITE HACERLO CON BG O FG
     tablero_frame_estilo.theme_use("clam") #USAMOS EL TEMA CLAM
     tablero_frame_estilo.configure("tablero_frame.TFrame", background="black", borderwidth=2, relief="raised") #LO DEFINIMOS Y PONEMOS NOMBRE DE REFERENCIA (HA DE ACABAR CON .TFrame)
-    tablero_frame = ttk.Frame(ventana_juego, padding=10, relief="raised", borderwidth=2, style="tablero_frame.TFrame") #CREAMOS EL FRAME CON EL ESTILO CREADO ANTERIORMENTE
+    tablero_frame = ttk.Frame(ventana_juego, padding=10, relief="raised", borderwidth=2, style="tablero_frame.TFrame", name="tablero_frame") #CREAMOS EL FRAME CON EL ESTILO CREADO ANTERIORMENTE
     tablero_frame.grid(row=2, column=0, sticky=tk.NSEW, padx=2, pady=2) #LO PONEMOS EN LA VENTANA
     #SETEAMOS LA ZONA DE JUEGO 3X3
     tablero_frame.rowconfigure(0, weight=1) 
@@ -121,6 +121,11 @@ def actualizar_mensaje(texto):
     if debug_enabled: print('--> actualizando mensaje a: '+texto)
     label = ttk.Label(ventana_juego, text=texto, font=("console", 15), background="black", foreground="white", justify="center")
     label.grid(row=1, column=0)
+
+#ACTUALIZADOR DE BOTON EN LA VENTANA
+def poner_signo_en_boton(boton, signo):
+    boton_a_cambiar = ventana_juego.nametowidget('.tablero_frame.'+boton) #OBTENEMOS EL BOTON DEL TABLERO
+    boton_a_cambiar["text"] = signo #CAMBIAMOS EL TEXTO DEL BOTON
 
 #CREAMOS LA INTELIGENCIA ARTIFICIAL
 def ia():
@@ -305,52 +310,56 @@ game_on = True
 #EJECUTAMOS LA JUGADA
 def jugar(jugada_boton):
     global contador_jugadas, game_on, jugadores, orden_jugadores, tablero, contador_partidas
-    if debug_enabled: print('--> jugada_boton: '+jugada_boton)
-    
-    if evaluar_tablas():
-        iniciar_tablero()
+    if game_on:
 
-    #IMPRIMIMOS EL TABLERO
-    imprimir_tablero(tablero)
+        #EVALUAMOS LAS TABLAS POSIBLES
+        if evaluar_tablas():
+            iniciar_tablero()
 
-    #PEDIMOS JUGADA
-    jugada_correcta = False
-    if orden_jugadores[contador_jugadas % 2] == 'P':
-        jugada = jugada_boton
-    else:
-        jugada = ia()
-        print('La IA ha jugado: '+jugada)
-    #ASIGNAMOS JUGADA AL TABLERO
-    tablero[jugada] = signos_jugadores[contador_jugadas % 2]
-    #INCREMENTAMOS JUGADA
-    contador_jugadas += 1
-    #VALIDAMOS SI HAY GANADOR
-    if (tablero['A1'] == tablero['A2'] == tablero['A3'] != ' ' or
-        tablero['B1'] == tablero['B2'] == tablero['B3'] != ' ' or
-        tablero['C1'] == tablero['C2'] == tablero['C3'] != ' ' or
-        tablero['A1'] == tablero['B1'] == tablero['C1'] != ' ' or
-        tablero['A2'] == tablero['B2'] == tablero['C2'] != ' ' or
-        tablero['A3'] == tablero['B3'] == tablero['C3'] != ' ' or
-        tablero['A1'] == tablero['B2'] == tablero['C3'] != ' ' or
-        tablero['A3'] == tablero['B2'] == tablero['C1'] != ' '):
-        print('El jugador '+signos_jugadores[contador_jugadas % 2]+' ha ganado')
-        game_on = False
-    elif (evaluar_tablas()):
-        print('Tablas')
-        if jugadores != ' ':
-            repetir = input('¿Quieres jugar de nuevo? (s/n): ').lower()
-            while repetir not in ['s', 'n']:
+        #IMPRIMIMOS EL TABLERO
+        imprimir_tablero(tablero)
+
+        #PEDIMOS JUGADA
+        jugada_correcta = False
+        if orden_jugadores[contador_jugadas % 2] == 'P':
+            jugada = jugada_boton
+        else:
+            jugada = ia()
+            print('La IA ha jugado: '+jugada)
+        #ASIGNAMOS JUGADA AL TABLERO
+        tablero[jugada] = signos_jugadores[contador_jugadas % 2]
+        #PINTAMOS EL SIGNO EN EL BOTON
+        poner_signo_en_boton(jugada_boton.lower(), signos_jugadores[contador_jugadas % 2])
+        #INCREMENTAMOS JUGADA
+        contador_jugadas += 1
+        #VALIDAMOS SI HAY GANADOR
+        if (tablero['A1'] == tablero['A2'] == tablero['A3'] != ' ' or
+            tablero['B1'] == tablero['B2'] == tablero['B3'] != ' ' or
+            tablero['C1'] == tablero['C2'] == tablero['C3'] != ' ' or
+            tablero['A1'] == tablero['B1'] == tablero['C1'] != ' ' or
+            tablero['A2'] == tablero['B2'] == tablero['C2'] != ' ' or
+            tablero['A3'] == tablero['B3'] == tablero['C3'] != ' ' or
+            tablero['A1'] == tablero['B2'] == tablero['C3'] != ' ' or
+            tablero['A3'] == tablero['B2'] == tablero['C1'] != ' '):
+            print('El jugador '+signos_jugadores[contador_jugadas % 2]+' ha ganado')
+            game_on = False
+        elif (evaluar_tablas()):
+            print('Tablas')
+            actualizar_mensaje('Tablas')
+            if jugadores != '0':
                 repetir = input('¿Quieres jugar de nuevo? (s/n): ').lower()
-            if repetir == 'n':
-                game_on = False
+                while repetir not in ['s', 'n']:
+                    repetir = input('¿Quieres jugar de nuevo? (s/n): ').lower()
+                if repetir == 'n':
+                    game_on = False
+                else:
+                    if jugadores == '1':
+                        orden_ia_jugador()
+                    contador_jugadas = 0
+                    contador_partidas += 1
             else:
-                if jugadores == '1':
-                    orden_ia_jugador()
                 contador_jugadas = 0
                 contador_partidas += 1
-        else:
-            contador_jugadas = 0
-            contador_partidas += 1
 
 #MANTENEMOS LA VENTANA ABIERTA
 ventana_juego.mainloop()
