@@ -192,6 +192,14 @@ def consultar_repetir():
         contador_jugadas = 0
         contador_partidas += 1
 
+#COMPROBAMOS SI HAN ESCRITO DEL REVES LA JUGADA
+def evaluar_voltear_jugada(jugada):
+    if debug_enabled: print('--> evaluando voltear jugada')
+    if (len(jugada) == 2):
+        if(jugada[0] in '123' and jugada[1] in 'ABC'):
+            return jugada[1]+jugada[0]
+    return jugada
+
 #PREGUNTAMOS NUMERO DE JUGADORES
 jugadores = input('¿Cuantos jugadores? (0, 1 o 2): ')
 while jugadores not in ['0', '1', '2']:
@@ -219,7 +227,7 @@ iniciar_tablero()
 game_on = True
 
 #INICIAMOS EL JUEGO
-while game_on or evaluar_tablas():
+while game_on:
     #SI VENIMOS DE TABLAS, LIMPIAMOS EL TRABLERO
     if evaluar_tablas():
         iniciar_tablero()
@@ -230,16 +238,19 @@ while game_on or evaluar_tablas():
     #PEDIMOS JUGADA
     jugada_correcta = False
     if orden_jugadores[contador_jugadas % 2] == 'P':
-        jugada = input('Introduce la jugada '+signos_jugadores[contador_jugadas % 2]+' (A1, B2, C3): ').upper()
+        jugada = input('Introduce la jugada '+signos_jugadores[contador_jugadas % 2]+' (LetraNumero): ').upper()
+        jugada = evaluar_voltear_jugada(jugada)
 
         #VALIDAMOS JUGADA
         while jugada_correcta == False:
             if len(jugada) != 2 or jugada[0] not in 'ABC' or jugada[1] not in '123':
                 print('Jugada imposible')
-                jugada = input('Introduce la jugada '+signos_jugadores[contador_jugadas % 2]+' (A1, B2, C3): ').upper()
+                jugada = input('Introduce la jugada '+signos_jugadores[contador_jugadas % 2]+' (LetraNumero): ').upper()
+                jugada = evaluar_voltear_jugada(jugada)
             elif tablero[jugada] != '0':
                 print('Jugada imposible')
-                jugada = input('Introduce la jugada '+signos_jugadores[contador_jugadas % 2]+' (A1, B2, C3): ').upper()
+                jugada = input('Introduce la jugada '+signos_jugadores[contador_jugadas % 2]+' (LetraNumero): ').upper()
+                jugada = evaluar_voltear_jugada(jugada)
             else:
                 jugada_correcta = True
     else:
