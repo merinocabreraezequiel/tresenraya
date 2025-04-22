@@ -82,14 +82,6 @@ def salir_del_juego():
     ventana_juego.destroy()
     exit()
 
-#IMPRIMIR PLANTILLA ORIGINAL
-def imprimir_tablero(tablero):
-    print(f'Partida {contador_partidas}\n')
-    print('  1 2 3')
-    print('A', tablero['A1'], tablero['A2'], tablero['A3'])
-    print('B', tablero['B1'], tablero['B2'], tablero['B3'])
-    print('C', tablero['C1'], tablero['C2'], tablero['C3'])
-
 #ACTIVAR TODOS LOS BOTONES
 def activar_botones():
     if debug_enabled: print('--> activando botones')
@@ -241,7 +233,7 @@ def cruz_disponible():
 
 #EVALUA SI HAY TABLAS
 def evaluar_tablas():
-    if debug_enabled: print('--> checkeando tablas')
+    if debug_enabled: print('--> Evaluando tablas')
     for espacio in tablero:
         if tablero[espacio] == ' ':
             return False
@@ -300,6 +292,35 @@ def preguntar_jugadores():
     preguntador_jugadores_entry.focus() #PONE EL FOCO EN EL ENTRY
 preguntar_jugadores()
 
+#PREGUNTAR REPETIR PARTIDA
+def repetir_partida(que_hacer):
+    global game_on, jugadores, contador_jugadas, contador_partidas
+    if debug_enabled: print('--> preguntando repetir partida: '+que_hacer)
+    
+    if jugadores != '0':
+        if que_hacer == 'n':
+            game_on = False
+        else:
+            
+            if jugadores == '1':
+                orden_ia_jugador()
+            contador_jugadas = 0
+            contador_partidas = 0
+    else:
+        contador_jugadas = 0
+        contador_partidas += 1
+
+def preguntar_repetir_partida():
+    fuente_repetir_partida = ttk.Style()
+    fuente_repetir_partida_style = font.Font(family="console", size=8)
+    fuente_repetir_partida.configure("fuente_repetir_partida.TButton",background="gray", font=fuente_repetir_partida_style) #DEFINIMOS LA FUENTE DE LOS BOTONES
+    preguntador_repetir_partida_boton_si = ttk.Button(ventana_juego, text='SI', command=lambda: repetir_partida('s'), style="fuente_repetir_partida.TButton", name="botton_repetir_partida_si") #CREAMOS EL BOTON DE SI
+    preguntador_repetir_partida_boton_no = ttk.Button(ventana_juego, text='NO', command=lambda: repetir_partida('n'), style="fuente_repetir_partida.TButton", name="botton_repetir_partida_no") #CREAMOS EL BOTON DE NO
+    preguntador_repetir_partida_label = ttk.Label(ventana_juego, text="¿Volver a jugar: ", font=("console", 12), background="black", foreground="white")
+    preguntador_repetir_partida_label.grid(row=1, column=0, sticky=tk.N)
+    preguntador_repetir_partida_boton_si.grid(row=1, column=0, sticky=tk.SE)
+    preguntador_repetir_partida_boton_no.grid(row=1, column=0, sticky=tk.SW)
+
 #PINTAMOS EL TABLERO EN LA VENTANA
 crear_tablero()
 
@@ -311,14 +332,6 @@ game_on = True
 def jugar(jugada_boton):
     global contador_jugadas, game_on, jugadores, orden_jugadores, tablero, contador_partidas
     if game_on:
-
-        #EVALUAMOS LAS TABLAS POSIBLES
-        if evaluar_tablas():
-            iniciar_tablero()
-
-        #IMPRIMIMOS EL TABLERO
-        imprimir_tablero(tablero)
-
         #PEDIMOS JUGADA
         jugada_correcta = False
         if orden_jugadores[contador_jugadas % 2] == 'P':
@@ -341,25 +354,15 @@ def jugar(jugada_boton):
             tablero['A3'] == tablero['B3'] == tablero['C3'] != ' ' or
             tablero['A1'] == tablero['B2'] == tablero['C3'] != ' ' or
             tablero['A3'] == tablero['B2'] == tablero['C1'] != ' '):
-            print('El jugador '+signos_jugadores[contador_jugadas % 2]+' ha ganado')
+            limpiar_parrilla(1,0) #LIMPIAMOS LA ZONA DE MENSAJE
+            actualizar_mensaje('El jugador '+signos_jugadores[contador_jugadas % 2]+' ha ganado') #INFORMAMOS DE QUIEN HA GANADO
             game_on = False
         elif (evaluar_tablas()):
-            print('Tablas')
-            actualizar_mensaje('Tablas')
-            if jugadores != '0':
-                repetir = input('¿Quieres jugar de nuevo? (s/n): ').lower()
-                while repetir not in ['s', 'n']:
-                    repetir = input('¿Quieres jugar de nuevo? (s/n): ').lower()
-                if repetir == 'n':
-                    game_on = False
-                else:
-                    if jugadores == '1':
-                        orden_ia_jugador()
-                    contador_jugadas = 0
-                    contador_partidas += 1
-            else:
-                contador_jugadas = 0
-                contador_partidas += 1
+            limpiar_parrilla(1,0) #LIMPIAMOS LA ZONA DE MENSAJE
+            actualizar_mensaje('Tablas') #INFORMAMOS DE LAS TABLAS
+            time.sleep(3) #ESPERAMOS PARA MOSTRAR LA OPCIÓN DE HACER OTR JUAGADA
+            limpiar_parrilla(1,0) #LIMPIAMOS LA ZONA DE MENSAJE
+            preguntar_repetir_partida() #PREGUNTAMOS SI QUIERE VOLVER A JUGAR
 
 #MANTENEMOS LA VENTANA ABIERTA
 ventana_juego.mainloop()
