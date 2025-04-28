@@ -259,37 +259,36 @@ ventana_juego = crear_ventana()
 jugadores = ' '
 #PREGUNTAMOS NUMERO DE JUGADORES
 evaluador_preguntador_jugadores = tk.StringVar()
-def comprobar_jugadores(*args):
-    if evaluador_preguntador_jugadores.get() in ['0', '1', '2']: #COMRPROBAMOS EL VALOR ESTÉ EN 0, 1 O 2
-        jugadores = evaluador_preguntador_jugadores.get() #ASIGNAMOS EL VALOR ESCRITO A LOS JUGADORES
-        if debug_enabled: print('--> jugadores: '+jugadores)
-        if jugadores == '0':
-            if debug_enabled: print('Modo PROFESOR FALKEN INICIANDO...')
-            actualizar_mensaje('Modo PROFESOR FALKEN')
-            orden_jugadores.append('IA')
-            orden_jugadores.append('IA')
-        elif jugadores == '1':
-            if debug_enabled: print('Modo SOLO INICIANDO...')
-            actualizar_mensaje('Modo SOLO')
-            orden_ia_jugador()
-        else:
-            if debug_enabled: print('Modo VS INICIANDO...')
-            actualizar_mensaje('Modo VS')
-            orden_jugadores.append('P')
-            orden_jugadores.append('P')
-            time.sleep(3)
-            actualizar_mensaje("TURNO DE X")
-        activar_botones() #ACTIVAMOS LOS BOTONES DEL TABLERO
+def comprobar_jugadores(_jugadores):
+    global jugadores
+    jugadores = _jugadores
+    if debug_enabled: print('--> jugadores: '+str(jugadores))
+    if jugadores == 0:
+        if debug_enabled: print('Modo PROFESOR FALKEN INICIANDO...')
+        actualizar_mensaje('Modo PROFESOR FALKEN')
+        orden_jugadores.append('IA')
+        orden_jugadores.append('IA')
+    elif jugadores == 1:
+        if debug_enabled: print('Modo SOLO INICIANDO...')
+        actualizar_mensaje('Modo SOLO')
+        orden_ia_jugador()
     else:
-        if debug_enabled: print('Error: Solo puedes elegir 0, 1 o 2 jugadores')
-        evaluador_preguntador_jugadores.set('') #LIMPIA EL TEXTO DEL ENTRY
+        if debug_enabled: print('Modo VS INICIANDO...')
+        actualizar_mensaje('Modo VS')
+        orden_jugadores.append('P')
+        orden_jugadores.append('P')
+        time.sleep(3)
+        actualizar_mensaje("TURNO DE X")
+    activar_botones() #ACTIVAMOS LOS BOTONES DEL TABLERO
 def preguntar_jugadores():  
-    evaluador_preguntador_jugadores.trace_add("write", comprobar_jugadores) #ASIGNAMOS LA FUNCION A LA VARIABLE DE ENTRADA
-    preguntador_jugadores_entry = ttk.Entry(ventana_juego, width=5, font=("console", 15), justify="center",textvariable=evaluador_preguntador_jugadores) #CREAMOS EL ENTRY PARA PREGUNTAR JUGADORES Y RELACIONA ASOCIA LA FUNCIÓN
-    preguntador_jugadores_texto = ttk.Label(ventana_juego, text="¿Cuantos jugadores? (0, 1 o 2): ", font=("console", 15), background="black", foreground="white")
+    preguntador_jugadores_button_0 = ttk.Button(ventana_juego, text='0', command=lambda: comprobar_jugadores(0), name="preguntador_jugadores_button_0") #CREAMOS EL BOTON DE 0
+    preguntador_jugadores_button_1 = ttk.Button(ventana_juego, text='1', command=lambda: comprobar_jugadores(1), name="preguntador_jugadores_button_1") #CREAMOS EL BOTON DE 1
+    preguntador_jugadores_button_2 = ttk.Button(ventana_juego, text='2', command=lambda: comprobar_jugadores(2), name="preguntador_jugadores_button_2") #CREAMOS EL BOTON DE 2
+    preguntador_jugadores_texto = ttk.Label(ventana_juego, text="¿Cuantos jugadores?", font=("console", 15), background="black", foreground="white")
     preguntador_jugadores_texto.grid(row=1, column=0, sticky=tk.N)
-    preguntador_jugadores_entry.grid(row=1, column=0, sticky=tk.S)
-    preguntador_jugadores_entry.focus() #PONE EL FOCO EN EL ENTRY
+    preguntador_jugadores_button_0.grid(row=1, column=0, sticky=tk.SW)
+    preguntador_jugadores_button_1.grid(row=1, column=0, sticky=tk.S)
+    preguntador_jugadores_button_2.grid(row=1, column=0, sticky=tk.SE)
 preguntar_jugadores()
 
 #PREGUNTAR REPETIR PARTIDA
