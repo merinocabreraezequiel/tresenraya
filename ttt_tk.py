@@ -40,7 +40,7 @@ def crear_tablero():
     fuente_boton.configure("fuente_boton.TButton",background="darkgray", font=fuente_boton_style) #DEFINIMOS LA FUENTE DE LOS BOTONES
     for vertical in ['A', 'B', 'C']:
         for horizontal in ['1', '2', '3']:
-            boton = ttk.Button(tablero_frame, text='', command=lambda v=vertical, h=horizontal: jugar(v+h), state='disabled', style="fuente_boton.TButton", name=vertical.lower()+horizontal) #CREAMOS EL BOTON CON EL VALOR DEL TABLERO Y LO DESHABILITAMOS
+            boton = ttk.Button(tablero_frame, text='', command=lambda v=vertical, h=horizontal: jugar_player(v+h), state='disabled', style="fuente_boton.TButton", name=vertical.lower()+horizontal) #CREAMOS EL BOTON CON EL VALOR DEL TABLERO Y LO DESHABILITAMOS
             vert, hori = conversor_posiciones_grid(vertical, horizontal)
             boton.grid(row=vert, column=hori, sticky=tk.NSEW , padx=2, pady=2) #CREAMOS EL BOTON Y LO PONEMOS EN SU POSICIÓN
             tablero[vertical+horizontal] = boton
@@ -296,12 +296,12 @@ def repetir_partida(que_hacer):
     global game_on, jugadores, contador_jugadas, contador_partidas
     if debug_enabled: print('--> preguntando repetir partida: '+que_hacer)
     
-    if jugadores != '0':
+    if jugadores != 0:
         if que_hacer == 'n':
             game_on = False
         else:
             
-            if jugadores == '1':
+            if jugadores == 1:
                 orden_ia_jugador()
             contador_jugadas = 0
             contador_partidas = 0
@@ -328,7 +328,7 @@ iniciar_tablero()
 game_on = True
 
 #EJECUTAMOS LA JUGADA
-def jugar(jugada_boton):
+def jugar_player(jugada_boton):
     global contador_jugadas, game_on, jugadores, orden_jugadores, tablero, contador_partidas
     if game_on:
         #PEDIMOS JUGADA
@@ -342,8 +342,6 @@ def jugar(jugada_boton):
         tablero[jugada] = signos_jugadores[contador_jugadas % 2]
         #PINTAMOS EL SIGNO EN EL BOTON
         poner_signo_en_boton(jugada_boton.lower(), signos_jugadores[contador_jugadas % 2])
-        #INCREMENTAMOS JUGADA
-        contador_jugadas += 1
         #VALIDAMOS SI HAY GANADOR
         if (tablero['A1'] == tablero['A2'] == tablero['A3'] != ' ' or
             tablero['B1'] == tablero['B2'] == tablero['B3'] != ' ' or
@@ -362,6 +360,8 @@ def jugar(jugada_boton):
             time.sleep(3) #ESPERAMOS PARA MOSTRAR LA OPCIÓN DE HACER OTR JUAGADA
             limpiar_parrilla(1,0) #LIMPIAMOS LA ZONA DE MENSAJE
             preguntar_repetir_partida() #PREGUNTAMOS SI QUIERE VOLVER A JUGAR
+        #INCREMENTAMOS JUGADA
+        contador_jugadas += 1
 
 #MANTENEMOS LA VENTANA ABIERTA
 ventana_juego.mainloop()
