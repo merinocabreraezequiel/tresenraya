@@ -125,7 +125,6 @@ def ia():
     if tablero['B2'] == ' ':
         jugada_ia = 'B2'
     else:
-        print('>>>'+tablero['B2']+'<<<')
         #COMPROBAMOS SI NOS PUEDEN GANAR O SI PODEMOS GANAR NOSOTROS
         posible_retorno_linia = jugadas_con_opción_de_linia()
         if ( posible_retorno_linia != None):
@@ -274,6 +273,7 @@ def comprobar_jugadores(_jugadores):
         actualizar_mensaje('Modo PROFESOR FALKEN')
         orden_jugadores.append('IA')
         orden_jugadores.append('IA')
+        jugar_player(ia()) #LA IA JUEGA SOLA
     elif jugadores == 1:
         if debug_enabled: print('Modo SOLO INICIANDO...')
         actualizar_mensaje('Modo SOLO')
