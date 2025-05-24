@@ -307,6 +307,7 @@ def repetir_partida(que_hacer):
             game_on = False
             salir_del_juego()
         else:
+            game_on = True
             contador_jugadas = 0
             contador_partidas += 1
             iniciar_tablero(True) #REINICIAMOS EL TABLERO
@@ -365,6 +366,7 @@ def jugar_player(jugada_boton=None):
             actualizar_mensaje('El jugador '+signos_jugadores[contador_jugadas % 2]+' ha ganado') #INFORMAMOS DE QUIEN HA GANADO
             game_on = False
         elif (evaluar_tablas()):
+            game_on = False
             limpiar_parrilla(1,0) #LIMPIAMOS LA ZONA DE MENSAJE
             actualizar_mensaje('Tablas') #INFORMAMOS DE LAS TABLAS
             time.sleep(3) #ESPERAMOS PARA MOSTRAR LA OPCIÓN DE HACER OTR JUAGADA
