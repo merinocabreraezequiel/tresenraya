@@ -16,10 +16,11 @@ tablero = {
         'B1': ' ', 'B2': ' ', 'B3': ' ',
         'C1': ' ', 'C2': ' ', 'C3': ' '
     }
-def iniciar_tablero(): #DAMOS VALORES ' ', LIBRES, A TODAS LAS POSICIONES DEL TABLERO
+def iniciar_tablero(_reiniciar=False): #DAMOS VALORES ' ', LIBRES, A TODAS LAS POSICIONES DEL TABLERO
     for vertical in ['A', 'B', 'C']:
         for horizontal in ['1', '2', '3']:
             tablero[vertical+horizontal] = ' '
+            if _reiniciar: poner_signo_en_boton(vertical.lower()+horizontal, ' ') #PONEMOS EL BOTON VACIO
 
 def crear_tablero():
     tablero_frame_estilo = ttk.Style() #CREAMOS EL ESTILO DEL FRAME, ttk NO PERMITE HACERLO CON BG O FG
@@ -261,7 +262,7 @@ def orden_ia_jugador():
 ventana_juego = crear_ventana()
 
 #DEFINIMOS COMO GLOBAL LOS JUGADORES
-jugadores = ' '
+jugadores = 0
 #PREGUNTAMOS NUMERO DE JUGADORES
 evaluador_preguntador_jugadores = tk.StringVar()
 def comprobar_jugadores(_jugadores):
@@ -301,16 +302,17 @@ preguntar_jugadores()
 def repetir_partida(que_hacer):
     global game_on, jugadores, contador_jugadas, contador_partidas
     if debug_enabled: print('--> preguntando repetir partida: '+que_hacer)
-    
     if jugadores != 0:
         if que_hacer == 'n':
             game_on = False
+            salir_del_juego()
         else:
-            
+            contador_jugadas = 0
+            contador_partidas += 1
+            iniciar_tablero(True) #REINICIAMOS EL TABLERO
+            activar_botones() #ACTIVAMOS LOS BOTONES DEL TABLERO           
             if jugadores == 1:
                 orden_ia_jugador()
-            contador_jugadas = 0
-            contador_partidas = 0
     else:
         contador_jugadas = 0
         contador_partidas += 1
