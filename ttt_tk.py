@@ -124,21 +124,26 @@ def ia():
     #AL CENTRO SI SE PUEDE
     if tablero['B2'] == ' ':
         jugada_ia = 'B2'
-    #COMPROBAMOS SI NOS PUEDEN GANAR O SI PODEMOS GANAR NOSOTROS
-    posible_retorno_linia = jugadas_con_opción_de_linia()
-    if ( posible_retorno_linia != None):
-        jugada_ia = posible_retorno_linia
-    #VEMOS POR DONDE ESTÁ JUGANDO EL RIVAL
-    posible_retorno_esquinas = jugadas_de_esquinas()
-    if ( posible_retorno_esquinas != None):
-        jugada_ia = posible_retorno_esquinas
-    #ELEGIMOS AL HAZAR UNA ESQUINA PARA EMPEZAR
-    posible_retorno_esquina_libre = esquina_disponible()
-    if ( posible_retorno_esquina_libre != None):
-        jugada_ia = posible_retorno_esquina_libre
-    #ELEGIMOS UNA CRUZ DISPONIBLE COMO ULTIMA OPCION
-    jugada_ia = cruz_disponible()
-    jugar(jugada_ia)
+    else:
+        print('>>>'+tablero['B2']+'<<<')
+        #COMPROBAMOS SI NOS PUEDEN GANAR O SI PODEMOS GANAR NOSOTROS
+        posible_retorno_linia = jugadas_con_opción_de_linia()
+        if ( posible_retorno_linia != None):
+            jugada_ia = posible_retorno_linia
+        else:
+            #VEMOS POR DONDE ESTÁ JUGANDO EL RIVAL
+            posible_retorno_esquinas = jugadas_de_esquinas()
+            if ( posible_retorno_esquinas != None):
+                jugada_ia = posible_retorno_esquinas
+            else:
+                #ELEGIMOS AL HAZAR UNA ESQUINA PARA EMPEZAR
+                posible_retorno_esquina_libre = esquina_disponible()
+                if ( posible_retorno_esquina_libre != None):
+                    jugada_ia = posible_retorno_esquina_libre
+                else:
+                    #ELEGIMOS UNA CRUZ DISPONIBLE COMO ULTIMA OPCION
+                    jugada_ia = cruz_disponible()
+    return jugada_ia
 
 #EVALUA TODAS LAS JUGADAS QUE PUEDAN HACER LINIA
 def jugadas_con_opción_de_linia():
@@ -247,6 +252,7 @@ def orden_ia_jugador():
         orden_jugadores.append('IA')
         orden_jugadores.append('P')
         print('La IA empieza')
+        jugar_player(ia()) #LA IA JUEGA PRIMERO
     else:
         orden_jugadores.append('P')
         orden_jugadores.append('IA')
@@ -328,20 +334,22 @@ iniciar_tablero()
 game_on = True
 
 #EJECUTAMOS LA JUGADA
-def jugar_player(jugada_boton):
+def jugar_player(jugada_boton=None):
     global contador_jugadas, game_on, jugadores, orden_jugadores, tablero, contador_partidas
     if game_on:
         #PEDIMOS JUGADA
         jugada_correcta = False
         if orden_jugadores[contador_jugadas % 2] == 'P':
             jugada = jugada_boton
+            #PINTAMOS EL SIGNO EN EL BOTON
+            poner_signo_en_boton(jugada_boton.lower(), signos_jugadores[contador_jugadas % 2])
         else:
             jugada = ia()
             print('La IA ha jugado: '+jugada)
+            #PINTAMOS EL SIGNO EN EL BOTON
+            poner_signo_en_boton(jugada.lower(), signos_jugadores[contador_jugadas % 2])
         #ASIGNAMOS JUGADA AL TABLERO
         tablero[jugada] = signos_jugadores[contador_jugadas % 2]
-        #PINTAMOS EL SIGNO EN EL BOTON
-        poner_signo_en_boton(jugada_boton.lower(), signos_jugadores[contador_jugadas % 2])
         #VALIDAMOS SI HAY GANADOR
         if (tablero['A1'] == tablero['A2'] == tablero['A3'] != ' ' or
             tablero['B1'] == tablero['B2'] == tablero['B3'] != ' ' or
@@ -362,6 +370,7 @@ def jugar_player(jugada_boton):
             preguntar_repetir_partida() #PREGUNTAMOS SI QUIERE VOLVER A JUGAR
         #INCREMENTAMOS JUGADA
         contador_jugadas += 1
+        if orden_jugadores[contador_jugadas % 2] != 'P': jugar_player() #SI ES TURNO DE LA IA, LLAMAMOS A LA FUNCIÓN PARA QUE JUEGUE
 
 #MANTENEMOS LA VENTANA ABIERTA
 ventana_juego.mainloop()
